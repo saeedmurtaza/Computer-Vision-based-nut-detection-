@@ -1,0 +1,984 @@
+<!-- O-HIVE frontend (index.html goes here) -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>O-HIVE AI Detection System</title>
+  <style>
+    :root {
+      --bg:#181818;
+      --panel:#232323;
+      --panel2:#1e1e1e;
+      --border:#3a3a3a;
+      --muted:#bdbdbd;
+      --ok:#35C85A;
+      --bad:#E74C3C;
+      --warn:#F1C40F;
+      --btn:#2e2e2e;
+      --btn-h:#3a3a3a;
+      --text:#e6e6e6;
+      --accent:#3498db;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font:14px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color:var(--accent); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    .app-shell {
+      display:flex;
+      flex-direction:column;
+      min-height:100vh;
+    }
+    header {
+      padding:10px 18px;
+      border-bottom:1px solid var(--border);
+      background:radial-gradient(circle at top, #303030 0, #181818 55%);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+    }
+    .logo-title {
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    h1 {
+      font-size:17px;
+      letter-letter-spacing:0.02em;
+    }
+    .sub {
+      font-size:11px;
+      color:var(--muted);
+    }
+    .top-controls {
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+    }
+    .btn {
+      border:1px solid var(--border);
+      background:var(--btn);
+      color:var(--text);
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      transition:background 0.15s, transform 0.05s, border-color 0.15s;
+    }
+    .btn:hover {
+      background:var(--btn-h);
+      border-color:#555;
+    }
+    .btn:active {
+      transform:translateY(1px) scale(0.99);
+    }
+    .btn-small {
+      padding:4px 8px;
+      font-size:11px;
+    }
+    .btn-ok {
+      border-color:#1e824c;
+    }
+    .btn-ok:hover {
+      border-color:#35C85A;
+    }
+    .btn-warn {
+      border-color:#aa8a25;
+    }
+    .btn-warn:hover {
+      border-color:#F1C40F;
+    }
+    .btn-bad {
+      border-color:#c0392b;
+    }
+    .btn-bad:hover {
+      border-color:#E74C3C;
+    }
+    .pill {
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      font-size:11px;
+      color:var(--muted);
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+    }
+    .pill-dot {
+      width:7px;
+      height:7px;
+      border-radius:999px;
+      background:var(--muted);
+    }
+    .pill-dot-ok { background:var(--ok); }
+    .pill-dot-bad { background:var(--bad); }
+    .pill-dot-warn { background:var(--warn); }
+
+    main {
+      flex:1;
+      display:flex;
+      padding:14px 16px 16px;
+      gap:14px;
+    }
+    .sidebar {
+      width:240px;
+      max-width:260px;
+      background:var(--panel);
+      border-radius:14px;
+      border:1px solid var(--border);
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .sidebar h2 {
+      font-size:13px;
+      text-transform:uppercase;
+      letter-spacing:0.08em;
+      color:var(--muted);
+      margin-bottom:4px;
+    }
+    .kv {
+      display:flex;
+      justify-content:space-between;
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:2px;
+    }
+    .kv span.key {
+      opacity:0.8;
+    }
+    .kv span.val {
+      color:#f5f5f5;
+    }
+    .divider {
+      border-top:1px solid var(--border);
+      margin:4px 0;
+    }
+    .hint {
+      font-size:11px;
+      color:var(--muted);
+      line-height:1.3;
+    }
+
+    .content {
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-width:0;
+    }
+
+    .cams-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(380px, 1fr));
+      gap:12px;
+    }
+    .cam-card {
+      background:var(--panel2);
+      border-radius:14px;
+      border:1px solid var(--border);
+      padding:10px 10px 9px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      min-width:0;
+    }
+    .cam-head {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+    }
+    .cam-title {
+      font-size:13px;
+      font-weight:600;
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .cam-title span.subline {
+      font-size:11px;
+      color:var(--muted);
+    }
+    .cam-status-tag {
+      font-size:10px;
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      text-transform:uppercase;
+      letter-spacing:0.06em;
+    }
+    .cam-status-active {
+      border-color:var(--ok);
+      color:var(--ok);
+    }
+    .cam-status-idle {
+      border-color:var(--muted);
+      color:var(--muted);
+    }
+
+    .cam-streams {
+      display:grid;
+      grid-template-columns:2fr 1.3fr;
+      gap:8px;
+    }
+    .cam-stream {
+      background:#101010;
+      border-radius:10px;
+      overflow:hidden;
+      border:1px solid #111;
+      position:relative;
+      min-height:150px;
+    }
+    /* ✅ Keep boxes stable: full-frame 4:3, ROI 1:1 */
+    .cam-streams .cam-stream:nth-child(1) {
+      aspect-ratio: 4 / 3;
+    }
+    .cam-streams .cam-stream:nth-child(2) {
+      aspect-ratio: 1 / 1;
+    }
+
+    .cam-stream img {
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+      background:#000;
+    }
+    .stream-label {
+      position:absolute;
+      left:6px;
+      top:6px;
+      font-size:10px;
+      padding:2px 6px;
+      border-radius:999px;
+      background:rgba(0,0,0,0.6);
+      border:1px solid rgba(255,255,255,0.1);
+      color:#eee;
+    }
+
+    .cam-stats {
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:4px;
+      margin-top:2px;
+    }
+    .metric {
+      background:#151515;
+      border-radius:8px;
+      padding:4px 6px;
+      border:1px solid #262626;
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .metric label {
+      font-size:10px;
+      color:var(--muted);
+    }
+    .metric span.val {
+      font-size:13px;
+      font-weight:600;
+    }
+    .metric.pass span.val { color:var(--ok); }
+    .metric.reject span.val { color:var(--bad); }
+    .metric.last span.val { font-size:11px; }
+
+    .cam-bottom-row {
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:2px;
+    }
+    .last-state-pill {
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      font-size:11px;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+    .last-state-pill span.dot {
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      background:var(--muted);
+    }
+    .last-state-pass span.dot { background:var(--ok); }
+    .last-state-reject span.dot { background:var(--bad); }
+    .last-state-idle span.dot { background:var(--muted); }
+
+    .cam-controls {
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:4px;
+    }
+
+    .cam-param-controls {
+      border-top:1px solid var(--border);
+      padding-top:4px;
+    }
+
+    .slider-group {
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:130px;
+    }
+    .slider-group label {
+      font-size:10px;
+      color:var(--muted);
+      display:flex;
+      justify-content:space-between;
+    }
+    .slider-group label span.val {
+      color:#f5f5f5;
+      font-variant-numeric:tabular-nums;
+    }
+    .slider-group input[type=range] {
+      width:100%;
+    }
+
+    input[type=range] {
+      -webkit-appearance:none;
+      height:4px;
+      border-radius:999px;
+      background:#444;
+      outline:none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance:none;
+      width:12px;
+      height:12px;
+      border-radius:50%;
+      background:var(--accent);
+      cursor:pointer;
+      border:1px solid #fff;
+      margin-top:-4px;
+    }
+    input[type=range]::-moz-range-thumb {
+      width:12px;
+      height:12px;
+      border-radius:50%;
+      background:var(--accent);
+      cursor:pointer;
+      border:1px solid #fff;
+    }
+
+    .toggle {
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      font-size:11px;
+      color:var(--muted);
+    }
+    .toggle input {
+      accent-color:var(--accent);
+      cursor:pointer;
+    }
+
+    .burst-input {
+      width:50px;
+      background:#1b1b1b;
+      border-radius:999px;
+      border:1px solid var(--border);
+      color:var(--text);
+      padding:3px 6px;
+      font-size:11px;
+      text-align:center;
+    }
+
+    .footer {
+      padding:6px 18px 10px;
+      font-size:10px;
+      color:var(--muted);
+      border-top:1px solid var(--border);
+      display:flex;
+      justify-content:space-between;
+    }
+
+    @media (max-width: 900px) {
+      main {
+        flex-direction:column;
+      }
+      .sidebar {
+        width:100%;
+        max-width:none;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <header>
+    <div class="logo-title">
+      <div>
+        <h1>O-HIVE AI Detection System</h1>
+        <div class="sub">Basler + PLC proximity trigger · multi-camera residue / threads inspection</div>
+      </div>
+    </div>
+    <div class="top-controls">
+      <button id="btn-connect" class="btn">⟳ Connect</button>
+      <button id="btn-start" class="btn btn-ok">▶ Start</button>
+      <button id="btn-stop" class="btn btn-bad">■ Stop</button>
+      <button id="btn-reset" class="btn btn-warn">✕ Reset counters</button>
+      <span id="plc-pill" class="pill">
+        <span class="pill-dot pill-dot-warn"></span>
+        PLC: <span id="plc-status-text">Unknown</span>
+      </span>
+    </div>
+  </header>
+
+  <main>
+    <aside class="sidebar">
+      <div>
+        <h2>System</h2>
+        <div class="kv"><span class="key">Device</span> <span class="val" id="sys-device">-</span></div>
+        <div class="kv"><span class="key">Save dir</span> <span class="val" id="sys-save-dir">-</span></div>
+        <div class="kv"><span class="key">Cameras</span> <span class="val" id="sys-cams">0</span></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div>
+        <h2>PLC trigger</h2>
+        <div class="kv"><span class="key">IP</span>   <span class="val" id="plc-ip">-</span></div>
+        <div class="kv"><span class="key">Port</span> <span class="val" id="plc-port">-</span></div>
+        <div class="kv"><span class="key">Bit</span>  <span class="val" id="plc-bit">-</span></div>
+        <div class="kv"><span class="key">Poll</span> <span class="val" id="plc-poll">-</span></div>
+        <div class="kv"><span class="key">Dead time</span> <span class="val" id="plc-dead">-</span></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div>
+        <h2>Notes</h2>
+        <p class="hint">
+          • Each camera has its own detection thresholds, ROI & camera params.<br/>
+          • One PLC rising edge → one capture & decision per camera.<br/>
+          • ROI preview (right) shows exactly what is used for YOLO.
+        </p>
+      </div>
+    </aside>
+
+    <section class="content">
+      <div class="cams-grid" id="cams-grid">
+        <!-- camera cards injected here -->
+      </div>
+    </section>
+  </main>
+
+  <div class="footer">
+    <span>O-HIVE · Luxolis.ai · Proximity-triggered nut inspection</span>
+    <span id="footer-status">Waiting for backend…</span>
+  </div>
+</div>
+
+<script>
+  const camsGrid = document.getElementById('cams-grid');
+  const footerStatus = document.getElementById('footer-status');
+
+  const plcPill = document.getElementById('plc-pill');
+  const plcStatusText = document.getElementById('plc-status-text');
+
+  const sysDeviceEl = document.getElementById('sys-device');
+  const sysSaveDirEl = document.getElementById('sys-save-dir');
+  const sysCamsEl = document.getElementById('sys-cams');
+  const plcIpEl = document.getElementById('plc-ip');
+  const plcPortEl = document.getElementById('plc-port');
+  const plcBitEl = document.getElementById('plc-bit');
+  const plcPollEl = document.getElementById('plc-poll');
+  const plcDeadEl = document.getElementById('plc-dead');
+
+  document.getElementById('btn-connect').addEventListener('click', async () => {
+    await simplePost('/api/connect');
+    location.reload();
+  });
+  document.getElementById('btn-start').addEventListener('click', async () => {
+    await simplePost('/api/start');
+  });
+  document.getElementById('btn-stop').addEventListener('click', async () => {
+    await simplePost('/api/stop');
+  });
+  document.getElementById('btn-reset').addEventListener('click', async () => {
+    await simplePost('/api/reset_counters');
+  });
+
+  async function simplePost(url, body) {
+    try {
+      await fetch(url, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: body ? JSON.stringify(body) : '{}'
+      });
+    } catch (e) {
+      console.error('POST failed', url, e);
+    }
+  }
+
+  // Build camera cards
+  async function buildCameraUI() {
+    camsGrid.innerHTML = '';
+    try {
+      const resStatus = await fetch('/api/status');
+      if (resStatus.ok) {
+        const s = await resStatus.json();
+        sysDeviceEl.textContent = s.device || '-';
+        sysSaveDirEl.textContent = (s.save_dir || '').split('\\').pop();
+        plcIpEl.textContent = s.plc?.ip ?? '-';
+        plcPortEl.textContent = s.plc?.port ?? '-';
+        plcBitEl.textContent = s.plc?.bit ?? '-';
+        plcPollEl.textContent = (s.plc?.poll_ms ?? '-') + ' ms';
+        plcDeadEl.textContent = (s.plc?.dead_ms ?? '-') + ' ms';
+
+        if (s.plc && s.plc.ip) {
+          plcStatusText.textContent = 'Configured';
+          const dot = plcPill.querySelector('.pill-dot');
+          dot.classList.remove('pill-dot-warn');
+          dot.classList.add('pill-dot-ok');
+        } else {
+          plcStatusText.textContent = 'Not configured';
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to fetch status', e);
+    }
+
+    try {
+      const res = await fetch('/api/cameras');
+      if (!res.ok) throw new Error('cameras API failed');
+      const data = await res.json();
+      const cams = data.cameras || [];
+      sysCamsEl.textContent = cams.length;
+      if (cams.length === 0) {
+        footerStatus.textContent = 'No cameras detected. Click “Connect” to re-scan Basler devices.';
+      } else {
+        footerStatus.textContent = 'Connected to ' + cams.length + ' camera(s).';
+      }
+
+      cams.forEach(cam => {
+        const card = document.createElement('div');
+        card.className = 'cam-card';
+        card.dataset.camId = cam.id;
+
+        // header
+        const head = document.createElement('div');
+        head.className = 'cam-head';
+        head.innerHTML = `
+          <div class="cam-title">
+            <span>${cam.name} · ID: ${cam.serial || cam.device_id || 'Unknown'}</span>
+            <span class="subline">
+              Model: ${cam.model || 'Not selected'} · Class: ${cam.neg_label}
+            </span>
+          </div>
+        `;
+
+        card.appendChild(head);
+
+        // streams
+        const streams = document.createElement('div');
+        streams.className = 'cam-streams';
+        streams.innerHTML = `
+          <div class="cam-stream">
+            <span class="stream-label">Full frame</span>
+            <img src="/video_feed/${cam.id}" alt="camera ${cam.id} preview" />
+          </div>
+          <div class="cam-stream">
+            <span class="stream-label">ROI view</span>
+            <img src="/video_feed_roi/${cam.id}" alt="camera ${cam.id} ROI" />
+          </div>
+        `;
+        card.appendChild(streams);
+
+        // stats
+        const stats = document.createElement('div');
+        stats.className = 'cam-stats';
+        const lastLabel = 'Last events';
+        stats.innerHTML = `
+          <div class="metric">
+            <label>Total</label>
+            <span class="val" id="cam-${cam.id}-total">0</span>
+          </div>
+          <div class="metric pass">
+            <label>Pass</label>
+            <span class="val" id="cam-${cam.id}-pass">0</span>
+          </div>
+          <div class="metric reject">
+            <label>Reject</label>
+            <span class="val" id="cam-${cam.id}-reject">0</span>
+          </div>
+          <div class="metric last">
+            <label>${lastLabel}</label>
+            <span class="val" id="cam-${cam.id}-defects">0</span>
+          </div>
+        `;
+        card.appendChild(stats);
+
+        // bottom row
+        const bottom = document.createElement('div');
+        bottom.className = 'cam-bottom-row';
+        bottom.innerHTML = `
+          <div class="last-state-pill last-state-idle" id="cam-${cam.id}-state-pill">
+            <span class="dot"></span>
+            <span id="cam-${cam.id}-state-text">Idle</span>
+            <span id="cam-${cam.id}-ts" style="opacity:.8;"></span>
+          </div>
+          <div class="hint" style="font-size:10px;">
+            ROI: <span id="cam-${cam.id}-roi">${cam.roi_norm || '-'}</span>
+          </div>
+        `;
+        card.appendChild(bottom);
+
+        // ================================
+        // PER-CAMERA CONTROLS INSERTED HERE
+        // ================================
+        const life = document.createElement('div');
+        life.className = 'cam-controls';
+        life.style.justifyContent = 'flex-end';
+
+        life.innerHTML = `
+          <button class="btn btn-small" id="cam-${cam.id}-btn-reconnect">⟳ Connect</button>
+          <button class="btn btn-small btn-ok" id="cam-${cam.id}-btn-start">▶ Start</button>
+          <button class="btn btn-small btn-bad" id="cam-${cam.id}-btn-stop">■ Stop</button>
+        `;
+        card.appendChild(life);
+
+        document.addEventListener('click', (ev) => {
+          if (ev.target.id === `cam-${cam.id}-btn-reconnect`) {
+            simplePost(`/api/camera/${cam.id}/reconnect`);
+          }
+          if (ev.target.id === `cam-${cam.id}-btn-start`) {
+            simplePost(`/api/camera/${cam.id}/start`);
+          }
+          if (ev.target.id === `cam-${cam.id}-btn-stop`) {
+            simplePost(`/api/camera/${cam.id}/stop`);
+          }
+        });
+
+        // -------- camera parameter controls (Option B: sliders) --------
+        const camParams = document.createElement('div');
+        camParams.className = 'cam-controls cam-param-controls';
+
+        const expDefault = cam.exposure ?? 3000;
+        const gainDefault = cam.gain ?? 6;
+        const fpsDefault = cam.fps ?? 49;
+
+        camParams.innerHTML = `
+          <div class="slider-group">
+            <label><span>Exposure (µs)</span><span class="val" id="cam-${cam.id}-exp-label">${expDefault}</span></label>
+            <input type="range" min="50" max="2000" step="10" value="${expDefault}" id="cam-${cam.id}-exp" />
+          </div>
+          <div class="slider-group">
+            <label><span>Gain (dB)</span><span class="val" id="cam-${cam.id}-gain-label">${gainDefault}</span></label>
+            <input type="range" min="0" max="24" step="0.5" value="${gainDefault}" id="cam-${cam.id}-gain" />
+          </div>
+          <div class="slider-group">
+            <label><span>FPS</span><span class="val" id="cam-${cam.id}-fps-label">${fpsDefault}</span></label>
+            <input type="range" min="5" max="80" step="1" value="${fpsDefault}" id="cam-${cam.id}-fps" />
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-end; min-width:180px;">
+            <div class="hint" style="font-size:10px; text-align:right;" id="cam-${cam.id}-param-summary">
+              Exp: ${expDefault} µs · Gain: ${gainDefault} dB · FPS: ${fpsDefault}
+            </div>
+            <button class="btn btn-small" id="cam-${cam.id}-apply-params">Apply camera params</button>
+          </div>
+        `;
+        card.appendChild(camParams);
+
+        const expSlider = camParams.querySelector(`#cam-${cam.id}-exp`);
+        const gainSlider = camParams.querySelector(`#cam-${cam.id}-gain`);
+        const fpsSlider = camParams.querySelector(`#cam-${cam.id}-fps`);
+        const expLabel = camParams.querySelector(`#cam-${cam.id}-exp-label`);
+        const gainLabel = camParams.querySelector(`#cam-${cam.id}-gain-label`);
+        const fpsLabel = camParams.querySelector(`#cam-${cam.id}-fps-label`);
+        const summaryEl = camParams.querySelector(`#cam-${cam.id}-param-summary`);
+        const applyBtn = camParams.querySelector(`#cam-${cam.id}-apply-params`);
+
+        function updateSummary() {
+          const e = Number(expSlider.value);
+          const g = Number(gainSlider.value);
+          const f = Number(fpsSlider.value);
+          expLabel.textContent = e;
+          gainLabel.textContent = g;
+          fpsLabel.textContent = f;
+          summaryEl.textContent = `Exp: ${e} µs · Gain: ${g} dB · FPS: ${f}`;
+        }
+        expSlider.addEventListener('input', updateSummary);
+        gainSlider.addEventListener('input', updateSummary);
+        fpsSlider.addEventListener('input', updateSummary);
+        applyBtn.addEventListener('click', () => applyCameraParams(cam.id));
+
+        // -------- detection controls (per camera) --------
+        const controls = document.createElement('div');
+        controls.className = 'cam-controls';
+
+        const toggleWrap = document.createElement('label');
+        toggleWrap.className = 'toggle';
+        toggleWrap.innerHTML = `
+          <input type="checkbox" id="cam-${cam.id}-detect-enabled" checked />
+          Detect
+        `;
+        const detectCheckbox = toggleWrap.querySelector('input');
+        detectCheckbox.addEventListener('change', () => {
+          sendDetectConfig(cam.id);
+        });
+        controls.appendChild(toggleWrap);
+
+        const confGroup = document.createElement('div');
+        confGroup.className = 'slider-group';
+        confGroup.innerHTML = `
+          <label>
+            <span>Conf</span>
+            <span class="val" id="cam-${cam.id}-conf-label">${(cam.conf ?? 0.95).toFixed(2)}</span>
+          </label>
+          <input type="range" min="0.50" max="1.00" step="0.01"
+                 value="${cam.conf ?? 0.95}" id="cam-${cam.id}-conf" />
+        `;
+        const confSlider = confGroup.querySelector('input');
+        const confLabel = confGroup.querySelector('.val');
+        confSlider.addEventListener('input', () => {
+          confLabel.textContent = Number(confSlider.value).toFixed(2);
+        });
+        confSlider.addEventListener('change', () => {
+          sendDetectConfig(cam.id);
+        });
+        controls.appendChild(confGroup);
+
+        const iouGroup = document.createElement('div');
+        iouGroup.className = 'slider-group';
+        iouGroup.innerHTML = `
+          <label>
+            <span>IoU</span>
+            <span class="val" id="cam-${cam.id}-iou-label">${(cam.iou ?? 0.30).toFixed(2)}</span>
+          </label>
+          <input type="range" min="0.10" max="0.70" step="0.01"
+                 value="${cam.iou ?? 0.30}" id="cam-${cam.id}-iou" />
+        `;
+        const iouSlider = iouGroup.querySelector('input');
+        const iouLabel = iouGroup.querySelector('.val');
+        iouSlider.addEventListener('input', () => {
+          iouLabel.textContent = Number(iouSlider.value).toFixed(2);
+        });
+        iouSlider.addEventListener('change', () => {
+          sendDetectConfig(cam.id);
+        });
+        controls.appendChild(iouGroup);
+
+        const burstWrap = document.createElement('div');
+        burstWrap.style.display = 'flex';
+        burstWrap.style.alignItems = 'center';
+        burstWrap.style.gap = '4px';
+
+        const snapBtn = document.createElement('button');
+        snapBtn.className = 'btn btn-small';
+        snapBtn.textContent = '📸 Snapshot';
+        snapBtn.addEventListener('click', () => doSnapshot(cam.id));
+
+        const burstInput = document.createElement('input');
+        burstInput.type = 'number';
+        burstInput.min = '1';
+        burstInput.max = '50';
+        burstInput.value = '5';
+        burstInput.className = 'burst-input';
+        burstInput.id = `cam-${cam.id}-burst-n`;
+
+        const burstBtn = document.createElement('button');
+        burstBtn.className = 'btn btn-small';
+        burstBtn.textContent = 'Burst';
+        burstBtn.addEventListener('click', () => doBurst(cam.id));
+
+        burstWrap.appendChild(snapBtn);
+        burstWrap.appendChild(burstInput);
+        burstWrap.appendChild(burstBtn);
+        controls.appendChild(burstWrap);
+
+        card.appendChild(controls);
+        camsGrid.appendChild(card);
+      });
+    } catch (e) {
+      console.error('Failed to build camera UI', e);
+      footerStatus.textContent = 'Error loading camera info.';
+    }
+  }
+
+  async function sendDetectConfig(camId) {
+    const enabledEl = document.getElementById(`cam-${camId}-detect-enabled`);
+    const confEl = document.getElementById(`cam-${camId}-conf`);
+    const iouEl = document.getElementById(`cam-${camId}-iou`);
+    if (!enabledEl || !confEl || !iouEl) return;
+    const payload = {
+      enabled: !!enabledEl.checked,
+      conf: parseFloat(confEl.value),
+      iou: parseFloat(iouEl.value),
+    };
+    try {
+      await fetch(`/api/camera/${camId}/detect`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(payload),
+      });
+    } catch (e) {
+      console.error('Failed to set detect config', e);
+    }
+  }
+
+  async function doSnapshot(camId) {
+    try {
+      const res = await fetch(`/api/snapshot/${camId}`);
+      if (!res.ok) return;
+      const js = await res.json();
+      console.log('Snapshot', js);
+      footerStatus.textContent = `Snapshot saved: ${js.path || ''}`;
+    } catch (e) {
+      console.error('snapshot error', e);
+    }
+  }
+
+  async function doBurst(camId) {
+    const nEl = document.getElementById(`cam-${camId}-burst-n`);
+    let n = 5;
+    if (nEl) {
+      n = parseInt(nEl.value, 10);
+      if (!Number.isFinite(n) || n <= 0) n = 5;
+    }
+    try {
+      const res = await fetch(`/api/burst/${camId}?n=${n}`, {
+        method:'POST'
+      });
+      if (!res.ok) return;
+      const js = await res.json();
+      console.log('Burst', js);
+      footerStatus.textContent = `Burst saved ${js.saved?.length || 0} image(s) for Cam ${camId}.`;
+    } catch (e) {
+      console.error('burst error', e);
+    }
+  }
+
+  async function applyCameraParams(camId) {
+    const expEl = document.getElementById(`cam-${camId}-exp`);
+    const gainEl = document.getElementById(`cam-${camId}-gain`);
+    const fpsEl = document.getElementById(`cam-${camId}-fps`);
+    if (!expEl || !gainEl || !fpsEl) return;
+
+    const exp = Number(expEl.value);
+    const gain = Number(gainEl.value);
+    const fps = Number(fpsEl.value);
+
+    try {
+      await Promise.all([
+        postCameraParam(camId, 'ExposureTime', exp),
+        postCameraParam(camId, 'Gain', gain),
+        postCameraParam(camId, 'AcquisitionFrameRateEnable', true),
+        postCameraParam(camId, 'AcquisitionFrameRate', fps),
+      ]);
+      footerStatus.textContent = `Updated Cam ${camId}: Exp ${exp} µs · Gain ${gain} dB · FPS ${fps}`;
+    } catch (e) {
+      console.error('applyCameraParams error', e);
+      footerStatus.textContent = `Failed to update camera ${camId} params.`;
+    }
+  }
+
+  async function postCameraParam(camId, key, value) {
+    return fetch(`/api/camera/${camId}/param`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ key, value })
+    });
+  }
+
+  function applyWsUpdate(data) {
+    if (!data || !Array.isArray(data.cameras)) return;
+    data.cameras.forEach(cam => {
+      const totalEl = document.getElementById(`cam-${cam.id}-total`);
+      const passEl = document.getElementById(`cam-${cam.id}-pass`);
+      const rejectEl = document.getElementById(`cam-${cam.id}-reject`);
+      const defectsEl = document.getElementById(`cam-${cam.id}-defects`);
+      const roiEl = document.getElementById(`cam-${cam.id}-roi`);
+      const statePill = document.getElementById(`cam-${cam.id}-state-pill`);
+      const stateText = document.getElementById(`cam-${cam.id}-state-text`);
+      const tsEl = document.getElementById(`cam-${cam.id}-ts`);
+
+      if (totalEl) totalEl.textContent = cam.total ?? 0;
+      if (passEl) passEl.textContent = cam.pass ?? 0;
+      if (rejectEl) rejectEl.textContent = cam.reject ?? 0;
+      if (defectsEl) defectsEl.textContent = cam.last_defects ?? 0;
+      if (roiEl && cam.roi_norm) roiEl.textContent = cam.roi_norm;
+
+      if (statePill && stateText) {
+        statePill.classList.remove('last-state-pass', 'last-state-reject', 'last-state-idle');
+        if (cam.last_state === 'pass') {
+          statePill.classList.add('last-state-pass');
+          stateText.textContent = 'PASS';
+        } else if (cam.last_state === 'reject') {
+          statePill.classList.add('last-state-reject');
+          stateText.textContent = 'REJECT';
+        } else {
+          statePill.classList.add('last-state-idle');
+          stateText.textContent = 'Idle';
+        }
+      }
+      if (tsEl) {
+        tsEl.textContent = cam.last_trigger_ts ? ` · ${cam.last_trigger_ts}` : '';
+      }
+    });
+  }
+
+  function initWs() {
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    const url = `${proto}://${location.host}/ws`;
+    let ws;
+    try {
+      ws = new WebSocket(url);
+    } catch (e) {
+      console.error('WebSocket init failed', e);
+      return;
+    }
+
+    ws.onopen = () => {
+      footerStatus.textContent = 'Live stats connected.';
+    };
+    ws.onmessage = (evt) => {
+      try {
+        const js = JSON.parse(evt.data);
+        applyWsUpdate(js);
+      } catch (e) {
+        console.error('WS parse error', e);
+      }
+    };
+    ws.onclose = () => {
+      footerStatus.textContent = 'Live stats disconnected. Reload if needed.';
+    };
+    ws.onerror = () => {
+      footerStatus.textContent = 'Live stats error.';
+    };
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    await buildCameraUI();
+    initWs();
+  });
+</script>
+</body>
+</html>
+
+
